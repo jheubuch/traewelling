@@ -71,7 +71,7 @@
                                     try {
                                         map.removeLayer(map._layers[i]);
                                     } catch (e) {
-                                        console.log("problem with " + e + map._layers[i]);
+                                        console.error("problem with " + e + map._layers[i]);
                                     }
                                 }
                             }
@@ -265,7 +265,7 @@ ${event.closestLink}`);
                 @include('includes.statuses', ['statuses' => $statuses, 'showDates' => false])
             </div>
         </div>
-    </div><!--- /container -->
+    </div>
 
     @include('includes.edit-modal')
     @include('includes.delete-modal')

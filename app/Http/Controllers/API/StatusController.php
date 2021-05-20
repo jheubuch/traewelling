@@ -52,9 +52,8 @@ class StatusController extends ResponseController
      * @return \Illuminate\Http\JsonResponse
      */
     public function getByEvent(int $eventID): JsonResponse {
-        $eventStatusResponse = Event::findOrFail($eventID)->statuses()
-                                    ->simplePaginate(15);
-        return $this->sendResponse($eventStatusResponse);
+        $eventStatusResponse = StatusBackend::getStatusesByEvent(null, $eventID);
+        return $this->sendResponse($eventStatusResponse['statuses']);
     }
 
     /**

@@ -41,16 +41,17 @@ class FrontendStatusController extends Controller
         return view('dashboard', [
             'statuses'    => $statuses,
             'currentUser' => $user,
-            'latest'      => TransportController::getLatestArrivals($user)
+            'latest'      => TransportController::getLatestArrivals($user),
+            'future'      => StatusBackend::getFutureCheckins()
         ]);
     }
 
     public function getGlobalDashboard(): Renderable {
-        $statuses = StatusBackend::getGlobalDashboard();
         return view('dashboard', [
-            'statuses'    => $statuses,
+            'statuses'    => StatusBackend::getGlobalDashboard(),
             'currentUser' => Auth::user(),
-            'latest'      => TransportController::getLatestArrivals(Auth::user())
+            'latest'      => TransportController::getLatestArrivals(Auth::user()),
+            'future'      => StatusBackend::getFutureCheckins()
         ]);
     }
 
@@ -64,14 +65,14 @@ class FrontendStatusController extends Controller
 
     public function EditStatus(Request $request): JsonResponse|RedirectResponse {
         $this->validate($request, [
-            'body'          => 'max:280',
-            'businessCheck' => 'max:1',
+            'body'           => ['max:280'],
+            'business_check' => ['required', 'digits_between:0,2'],
         ]);
         $editStatusResponse = StatusBackend::EditStatus(
             Auth::user(),
             $request['statusId'],
             $request['body'],
-            $request['businessCheck']
+            $request['business_check']
         );
         if ($editStatusResponse === false) {
             return redirect()->back();
@@ -135,17 +136,11 @@ class FrontendStatusController extends Controller
     }
 
     public function statusesByEvent(string $event): Renderable {
-        $event = Event::where('slug', $event)->first();
-        if ($event == null) {
-            abort(404);
-        }
-
-        $statusesResponse = $event->statuses()
-                                  ->simplePaginate(15);
+        $response = StatusController::getStatusesByEvent($event, null);
 
         return view('eventsMap', [
-            'statuses' => $statusesResponse,
-            'event'    => $event
+            'statuses' => $response['statuses'],
+            'event'    => $response['event']
         ]);
     }
 

@@ -63,7 +63,7 @@
                                             <td>
                                                 @if($stop['plannedArrival'] != null)
                                                     {{ __('stationboard.arr') }}
-                                                    {{ \Carbon\Carbon::parse($stop['plannedArrival'])->format('H:i')}}
+                                                    {{ \Carbon\Carbon::parse($stop['plannedArrival'])->isoFormat(__('time-format'))}}
                                                     @if(isset($stop['arrivalDelay']))
                                                         <small>(<span
                                                                     class="traindelay">+{{ $stop['arrivalDelay'] / 60 }}</span>)</small>
@@ -72,7 +72,7 @@
                                                 <br/>
                                                 @if($stop['plannedDeparture'] != null)
                                                     {{ __('stationboard.dep') }}
-                                                    {{ \Carbon\Carbon::parse($stop['plannedDeparture'])->format('H:i')}}
+                                                    {{ \Carbon\Carbon::parse($stop['plannedDeparture'])->isoFormat(__('time-format'))}}
                                                     @if(isset($stop['departureDelay']))
                                                         <small>(<span
                                                                     class="traindelay">+{{ $stop['departureDelay']/60 }}</span>)</small>
@@ -109,8 +109,9 @@
                             </label>
                             <textarea name="body" class="form-control" id="message-text"></textarea>
                         </div>
-                        @if (auth()->user()->socialProfile != null)
-                            <div class="mt-2">
+
+                        <div class="mt-2">
+                            @if (auth()->user()->socialProfile != null)
                                 @if (auth()->user()->socialProfile->twitter_id != null)
                                     <input type="checkbox" class="btn-check" id="tweet_check" autocomplete="off"
                                            name="tweet_check">
@@ -128,8 +129,9 @@
                                         <span class="visually-hidden-focusable">{{ __('stationboard.check-toot') }}</span>
                                     </label>
                                 @endif
-                            </div>
-                        @endif
+                            @endif
+                            @include('includes.business-dropdown')
+                        </div>
 
                         @if($events->count() == 1)
                             <div class="custom-control custom-checkbox mt-2">
@@ -155,7 +157,6 @@
                             <input type="hidden" name="event" value="0"/>
                         @endif
 
-                        <input type="hidden" id="business_check" name="business_check" value=""/>
                         <input type="hidden" id="input-tripID" name="tripID" value=""/>
                         <input type="hidden" id="input-destination" name="destination" value=""/>
                         <input type="hidden" name="start" value="{{request()->start}}"/>

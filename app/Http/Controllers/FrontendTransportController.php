@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\TravelType;
 use App\Exceptions\CheckInCollisionException;
 use App\Exceptions\HafasException;
 use App\Http\Controllers\EventController as EventBackend;
@@ -32,12 +33,7 @@ class FrontendTransportController extends Controller
         $validated = $request->validate([
                                             'station'    => ['required', 'string'],
                                             'when'       => ['nullable', 'date'],
-                                            'travelType' => ['nullable', Rule::in([
-                                                                                      'nationalExpress', 'express',
-                                                                                      'regionalExp', 'regional',
-                                                                                      'suburban', 'bus', 'ferry',
-                                                                                      'subway', 'tram', 'taxi'
-                                                                                  ])]
+                                            'travelType' => ['nullable', Rule::in(TravelType::getList())]
                                         ]);
 
         $when = isset($validated['when']) ? Carbon::parse($validated['when']) : null;
@@ -129,7 +125,7 @@ class FrontendTransportController extends Controller
     public function TrainCheckin(Request $request): RedirectResponse {
         $this->validate($request, [
             'body'           => 'max:280',
-            'business_check' => 'max:0', // Wenn wir Businesstrips wieder einbringen, kann man das wieder auf mehr stellen.
+            'business_check' => 'digits_between:0,2',
             'tweet_check'    => 'max:2',
             'toot_check'     => 'max:2',
             'event'          => 'integer',

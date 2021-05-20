@@ -12,11 +12,14 @@
                         <label for="status-body">{{__('modals.editStatus-label')}}</label>
                         <textarea class="form-control" name="status-body" id="status-body" rows="5"></textarea>
                     </div>
+                    <div class="mt-2">
+                        @include('includes.business-dropdown')
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-mdb-dismiss="modal">{{__('menu.discard')}}</button>
-                <button type="button" class="btn btn-primary" id="modal-save">{{__('modals.edit-confirm')}}</button>
+                <button type="button" class="btn btn-primary" id="modal-trwl-edit-save">{{__('modals.edit-confirm')}}</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
