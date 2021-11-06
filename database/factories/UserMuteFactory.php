@@ -13,8 +13,8 @@ class UserMuteFactory extends Factory
     protected $model = UserMute::class;
 
     #[ArrayShape([
-        'user_id'  => "\Illuminate\Database\Eloquent\Factories\Factory",
-        'muted_id' => "\Illuminate\Database\Eloquent\Factories\Factory"
+        'user_id'  => Factory::class,
+        'muted_id' => Factory::class
     ])]
     public function definition(): array {
         return [

@@ -13,7 +13,7 @@ class IcsTokenFactory extends Factory
     protected $model = IcsToken::class;
 
     #[ArrayShape([
-        'user_id' => "\Illuminate\Database\Eloquent\Factories\Factory",
+        'user_id' => Factory::class,
         'token'   => "string"
     ])]
     public function definition(): array {

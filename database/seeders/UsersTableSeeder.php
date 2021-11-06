@@ -22,7 +22,6 @@ class UsersTableSeeder extends Seeder
                          'username' => 'Gertrud123',
                          'name'     => 'Gertrud',
                          'email'    => 'gertrud@traewelling.de',
-                         'password' => Hash::make('thisisnotasecurepassword123')
                      ]);
 
         User::factory()
@@ -31,7 +30,6 @@ class UsersTableSeeder extends Seeder
                          'name'            => 'Bob from Alice & Bob',
                          'email'           => 'bob@example.com',
                          'private_profile' => true,
-                         'password'        => Hash::make('thisisnotasecurepassword123')
                      ]);
 
         User::factory()

@@ -19,7 +19,7 @@ class TrainStationFactory extends Factory
      *
      * @return array
      */
-    public function definition() {
+    public function definition(): array {
         return [
             'ibnr'      => $this->faker->unique()->numberBetween(8000001, 8999999),
             'name'      => $this->faker->unique()->city,

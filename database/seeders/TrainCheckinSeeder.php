@@ -3,12 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enum\StatusVisibility;
-use App\Exceptions\CheckInCollisionException;
-use App\Exceptions\HafasException;
-use App\Exceptions\StationNotOnTripException;
 use App\Http\Controllers\TransportController;
 use App\Models\HafasTrip;
 use App\Models\User;
+use Exception;
 use Illuminate\Database\Seeder;
 
 class TrainCheckinSeeder extends Seeder
@@ -34,7 +32,7 @@ class TrainCheckinSeeder extends Seeder
                     StatusVisibility::PUBLIC,
                     rand(0, 1)
                 );
-            } catch (CheckInCollisionException | HafasException | StationNotOnTripException) {
+            } catch (Exception) {
                 continue;
             }
         }

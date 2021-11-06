@@ -15,12 +15,12 @@ class EventSuggestionFactory extends Factory
     protected $model = EventSuggestion::class;
 
     #[ArrayShape([
-        'user_id'          => "\Illuminate\Database\Eloquent\Factories\Factory",
+        'user_id'          => Factory::class,
         'name'             => "string",
         'hashtag'          => "string",
         'host'             => "string",
         'url'              => "string",
-        'train_station_id' => "\Illuminate\Database\Eloquent\Factories\Factory",
+        'train_station_id' => Factory::class,
         'begin'            => "string",
         'end'              => "string"
     ])]

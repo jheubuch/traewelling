@@ -8,7 +8,6 @@ use App\Models\HafasTrip;
 use App\Models\TrainStation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\DB;
 
 class HafasTripFactory extends Factory
 {
@@ -30,7 +29,7 @@ class HafasTripFactory extends Factory
         $stopOvers = [];
         $time      = Carbon::now()->subMinutes(15);
         foreach ($stops as $stop) {
-            array_push($features, [
+            $features[]  = [
                 'type'       => 'Feature',
                 'properties' => [
                     'type'     => 'stop',
@@ -42,7 +41,7 @@ class HafasTripFactory extends Factory
                         'latitude'  => $stop->latitude,
                         'longitude' => $stop->longitude,
                     ],
-                    'products' => array_fill_keys(HafasTravelType::getList(), $this->faker->boolean(50)),
+                    'products' => array_fill_keys(HafasTravelType::getList(), $this->faker->boolean()),
                 ],
                 'geometry'   => [
                     'type'        => 'Point',
@@ -51,8 +50,8 @@ class HafasTripFactory extends Factory
                         $stop->latitude,
                     ]
                 ]
-            ]);
-            array_push($stopOvers, [
+            ];
+            $stopOvers[] = [
                 'stop'                     => [
                     'type'     => 'stop',
                     'id'       => $stop->ibnr,
@@ -75,12 +74,14 @@ class HafasTripFactory extends Factory
                 'departureDelay'           => null,
                 'departurePlatform'        => null,
                 'plannedDeparturePlatform' => null,
-            ]);
+            ];
             $time->addMinutes(30);
         }
 
-        $polyline = json_encode(['type'     => 'FeatureCollection',
-                                 'features' => $features]);
+        $polyline = json_encode([
+                                    'type'     => 'FeatureCollection',
+                                    'features' => $features,
+                                ]);
         $polyline = TransportController::getPolylineHash($polyline);
         return [
             'trip_id'     => $this->faker->unique()->numerify('1|######|##|##|') . Carbon::now()->format('dmY'),
@@ -102,7 +103,7 @@ class HafasTripFactory extends Factory
      *
      * @return $this
      */
-    public function configure() {
+    public function configure(): static {
         return $this->afterCreating(function(HafasTrip $hafasTrip) {
             if (!isset($hafasTrip->stopovers)) {
                 return;

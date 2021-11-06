@@ -20,7 +20,7 @@ class StatusFactory extends Factory
      *
      * @return array
      */
-    public function definition() {
+    public function definition(): array {
         return [
             'body'    => $this->faker->paragraph,
             'user_id' => User::factory()
