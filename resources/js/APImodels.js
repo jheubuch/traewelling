@@ -64,7 +64,9 @@ export let StatusModel = {
     body: "",
     type: "",
     createdAt: "",
-    user: ProfileModel,
+    user: 0,
+    username: "",
+    preventIndex: false,
     business: 0,
     visibility: 0,
     likes: 0,
@@ -137,3 +139,31 @@ export let visibility = [
         detail: "_.status.visibility.3.detail"
     },
 ];
+
+export let profileNotifications = [
+    "App\\Notifications\\FollowRequestApproved",
+    "App\\Notifications\\FollowRequestIssued",
+    "App\\Notifications\\UserFollowed",
+];
+
+export let statusNotifications = [
+    "App\\Notifications\\MastodonNotSent",
+    "App\\Notifications\\StatusLiked",
+    "App\\Notifications\\TwitterNotSent",
+    "App\\Notifications\\UserJoinedConnection"
+];
+
+export let userProfileSettings = {
+    username: "",
+    name: "",
+    private_profile: false,
+    prevent_index: false,
+    always_dbl: false,
+    default_status_visibility: 0,
+    password: false,
+    email: "",
+    email_verified: true,
+    profile_picture_set: false,
+    twitter: null,
+    mastodon: null
+};

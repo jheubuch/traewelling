@@ -13,10 +13,14 @@
 
 use App\Http\Controllers\API\v1\AuthController as v1Auth;
 use App\Http\Controllers\API\v1\EventController;
+use App\Http\Controllers\API\v1\IcsController;
 use App\Http\Controllers\API\v1\LikesController;
-use App\Http\Controllers\API\v1\NotificationController;
+use App\Http\Controllers\API\v1\NotificationsController;
+use App\Http\Controllers\API\v1\SessionController;
+use App\Http\Controllers\API\v1\SettingsController;
 use App\Http\Controllers\API\v1\StatisticsController;
 use App\Http\Controllers\API\v1\StatusController;
+use App\Http\Controllers\API\v1\TokenController;
 use App\Http\Controllers\API\v1\TransportController;
 use App\Http\Controllers\API\v1\UserController;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +28,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1', 'middleware' => 'return-json'], function() {
     Route::group(['prefix' => 'auth'], function() {
         Route::post('login', [v1Auth::class, 'login']);
-        Route::post('signup', [v1Auth::class, 'signup']);
+        Route::post('signup', [v1Auth::class, 'register']);
         Route::group(['middleware' => 'auth:api'], function() {
             Route::post('refresh', [v1Auth::class, 'refresh']);
             Route::post('logout', [v1Auth::class, 'logout']);
@@ -41,8 +45,14 @@ Route::group(['prefix' => 'v1', 'middleware' => 'return-json'], function() {
         Route::delete('like/{status}', [LikesController::class, 'destroy']);
         Route::delete('statuses/{id}', [StatusController::class, 'destroy']);
         Route::put('statuses/{id}', [StatusController::class, 'update']);
-        Route::get('notifications', [NotificationController::class, 'index']);
-        Route::get('notifications/count', [NotificationController::class, 'count']);
+        Route::group(['prefix' => 'notifications'], function() {
+            Route::get('/', [NotificationsController::class, 'index']);
+            Route::get('count', [NotificationsController::class, 'count']);
+            Route::put('{id}', [NotificationsController::class, 'update']);
+            Route::put('read/{id}', [NotificationsController::class, 'read']);
+            Route::put('unread/{id}', [NotificationsController::class, 'unread']);
+            Route::post('readAll', [NotificationsController::class, 'readAll']);
+        });
         Route::group(['prefix' => 'trains'], function() {
             Route::get('trip/', [TransportController::class, 'getTrip']);
             Route::post('checkin', [TransportController::class, 'create']);
@@ -59,10 +69,31 @@ Route::group(['prefix' => 'v1', 'middleware' => 'return-json'], function() {
             Route::get('/global', [StatisticsController::class, 'getGlobalStatistics']);
             Route::post('export', [StatisticsController::class, 'generateTravelExport']);
         });
-        Route::post('user/createFollow', [UserController::class, 'createFollow']);
-        Route::delete('user/destroyFollow', [UserController::class, 'destroyFollow']);
-        Route::post('user/createMute', [UserController::class, 'createMute']);
-        Route::delete('user/destroyMute', [UserController::class, 'destroyMute']);
+        Route::group(['prefix' => 'user'], function() {
+            Route::post('createFollow', [UserController::class, 'createFollow']);
+            Route::delete('destroyFollow', [UserController::class, 'destroyFollow']);
+            Route::post('createMute', [UserController::class, 'createMute']);
+            Route::delete('destroyMute', [UserController::class, 'destroyMute']);
+            Route::get('search/{query}', [UserController::class, 'search']);
+        });
+        Route::group(['prefix' => 'settings'], function() {
+            Route::get('profile', [SettingsController::class, 'getProfileSettings']);
+            Route::put('profile', [SettingsController::class, 'updateSettings']);
+            Route::delete('profilePicture', [SettingsController::class, 'deleteProfilePicture']);
+            Route::post('profilePicture', [SettingsController::class, 'uploadProfilePicture']);
+            Route::put('email', [SettingsController::class, 'updateMail']);
+            Route::post('email/resend', [SettingsController::class, 'resendMail']);
+            Route::put('password', [SettingsController::class, 'updatePassword']);
+            Route::delete('account', [UserController::class, 'deleteAccount']);
+            Route::get('ics-tokens', [IcsController::class, 'getIcsTokens']);
+            Route::post('ics-token', [IcsController::class, 'createIcsToken']);
+            Route::delete('ics-token', [IcsController::class, 'revokeIcsToken']);
+            Route::get('sessions', [SessionController::class, 'index']);
+            Route::delete('sessions', [SessionController::class, 'deleteAllSessions']);
+            Route::get('tokens', [TokenController::class, 'index']);
+            Route::delete('tokens', [TokenController::class, 'revokeAllTokens']);
+            Route::delete('token', [TokenController::class, 'revokeToken']);
+        });
     });
 
     Route::group(['middleware' => 'semiguest:api'], function() {

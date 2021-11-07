@@ -12,7 +12,9 @@ import Stationboard from "../components/views/Stationboard";
 import Trip from "../components/views/Trip";
 import Index from "../components/views/Index";
 import About from "../components/views/About";
-import Charts from "../components/views/Charts";
+import Charts from "../components/views/Statistics";
+import SearchView from "../components/views/SearchView";
+import SettingsView from "../components/views/Settings";
 
 Vue.use(VueRouter);
 
@@ -46,9 +48,13 @@ export const router = new VueRouter({
                 name: "singleStatus"
             },
             {
-                path: "/profile/:username",
+                path: "/@:username",
                 component: Profile,
                 name: "profile"
+            },
+            {
+                path: "/profile/:username",
+                redirect: "/@:username"
             },
             {
                 path: "/event/:slug",
@@ -109,6 +115,22 @@ export const router = new VueRouter({
                 path: "/statistics",
                 component: Charts,
                 name: "statistics",
+                meta: {
+                    auth: true
+                }
+            },
+            {
+                path: "/search",
+                component: SearchView,
+                name: "search",
+                meta: {
+                    auth: true
+                }
+            },
+            {
+                path: "/settings",
+                component: SettingsView,
+                name: "settings",
                 meta: {
                     auth: true
                 }

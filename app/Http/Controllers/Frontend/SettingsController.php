@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Enum\StatusVisibility;
 use App\Exceptions\AlreadyFollowingException;
+use App\Http\Controllers\Backend\User\SessionController;
+use App\Http\Controllers\Backend\User\TokenController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SettingsController as SettingsBackend;
 use Illuminate\Contracts\Support\Renderable;
@@ -12,40 +14,41 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Jenssegers\Agent\Agent;
 
 class SettingsController extends Controller
 {
 
+    /** @deprecated replaced by Backend/SettingsController::updateSettings in vue */
     public function updateMainSettings(Request $request): RedirectResponse {
         $validated = $request->validate([
-                                            'username' => ['required', 'string', 'max:25', 'regex:/^[a-zA-Z0-9_]*$/'],
-                                            'name'     => ['required', 'string', 'max:50'],
-                                            'email'    => ['required', 'string', 'email', 'max:255'],
-                                            'avatar'   => 'image'
+                                            'username'   => ['required', 'string', 'max:25', 'regex:/^[a-zA-Z0-9_]*$/'],
+                                            'name'       => ['required', 'string', 'max:50'],
+                                            'email'      => ['required', 'string', 'email:rfc,dns', 'max:255'],
+                                            'always_dbl' => ['nullable'],
                                         ]);
 
-        if (auth()->user()->username != $request->username) {
+        if (auth()->user()->username !== $validated['username']) {
             $request->validate(['username' => ['unique:users']]);
         }
-        if (auth()->user()->email != $request->email) {
+
+        if (auth()->user()->email !== $validated['email']) {
             $request->validate(['email' => ['unique:users']]);
-            auth()->user()->update(['email_verified_at' => null]);
+            $validated['email_verified_at'] = null;
+            $validated['email']             = strtolower($validated['email']);
         }
-        auth()->user()->update([
-                                   'email'      => $validated['email'],
-                                   'username'   => $validated['username'],
-                                   'name'       => $validated['name'],
-                                   'always_dbl' => $request->always_dbl === "on",
-                               ]);
+        $validated['always_dbl'] = isset($validated['always_dbl']) && $validated['always_dbl'] === 'on';
+
+        auth()->user()->update($validated);
 
         if (!auth()->user()->hasVerifiedEmail()) {
             auth()->user()->sendEmailVerificationNotification();
+            session()->flash('info', __('email.verification.sent'));
         }
 
         return back();
     }
 
+    /** @deprecated replaced by Backend/SettingsController::updateSettings in vue */
     public function updatePrivacySettings(Request $request): RedirectResponse {
         $validated = $request->validate([
                                             'private_profile'           => ['nullable'],
@@ -86,25 +89,9 @@ class SettingsController extends Controller
     }
 
     public function renderSettings(): Renderable {
-        $sessions = auth()->user()->sessions->map(function($session) {
-            $result = new Agent();
-            $result->setUserAgent($session->user_agent);
-            $session->platform = $result->platform();
-
-            if ($result->isphone()) {
-                $session->device_icon = 'mobile-alt';
-            } elseif ($result->isTablet()) {
-                $session->device_icon = 'tablet';
-            } else {
-                $session->device_icon = 'desktop';
-            }
-
-            return $session;
-        });
-
         return view('settings.settings', [
-            'sessions' => $sessions,
-            'tokens'   => auth()->user()->tokens->where('revoked', '0')
+            'sessions' => SessionController::index(user: auth()->user()),
+            'tokens'   => TokenController::index(user: auth()->user())
         ]);
     }
 
@@ -112,6 +99,7 @@ class SettingsController extends Controller
      * Approve a follow request
      *
      * @param Request $request
+     *
      * @return RedirectResponse
      * @throws AlreadyFollowingException
      */
@@ -137,7 +125,9 @@ class SettingsController extends Controller
 
     /**
      * Reject a follow request
+     *
      * @param Request $request
+     *
      * @return RedirectResponse
      */
     public function rejectFollower(Request $request): RedirectResponse {

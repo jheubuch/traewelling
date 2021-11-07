@@ -6,6 +6,7 @@ use App\Enum\StatusVisibility;
 use App\Enum\TravelType;
 use App\Exceptions\CheckInCollisionException;
 use App\Exceptions\HafasException;
+use App\Exceptions\TrainCheckinAlreadyExistException;
 use App\Http\Controllers\Backend\EventController as EventBackend;
 use App\Http\Controllers\TransportController as TransportBackend;
 use Carbon\Carbon;
@@ -24,8 +25,12 @@ use Throwable;
 class FrontendTransportController extends Controller
 {
     public function TrainAutocomplete(string $station): JsonResponse {
-        $TrainAutocompleteResponse = TransportBackend::getTrainStationAutocomplete($station);
-        return response()->json($TrainAutocompleteResponse);
+        try {
+            $TrainAutocompleteResponse = TransportBackend::getTrainStationAutocomplete($station);
+            return response()->json($TrainAutocompleteResponse);
+        } catch (HafasException $e) {
+            abort(503, $e->getMessage());
+        }
     }
 
     public function TrainStationboard(Request $request): Renderable|RedirectResponse {
@@ -173,6 +178,8 @@ class FrontendTransportController extends Controller
                     ]
                 ));
 
+        } catch (TrainCheckinAlreadyExistException) {
+            return redirect()->route('dashboard')->with('error', __('messages.exception.general'));
         } catch (Throwable $exception) {
             report($exception);
             return redirect()
