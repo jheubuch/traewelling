@@ -25,7 +25,7 @@
         "apexcharts": "^3.33.2",
         "awesomplete": "^1.1.5",
         "bootstrap-cookie-alert": "^1.2.1",
-        "chart.js": "^2.9.4",
+        "chart.js": "^4.2.1",
         "croppie": "^2.6.5",
         "leaflet": "^1.9.2",
         "mdb-ui-kit": "^5.0.0",
