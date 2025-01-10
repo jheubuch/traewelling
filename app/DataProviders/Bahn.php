@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\TransportController;
 use App\Hydrators\DepartureHydrator;
 use App\Models\HafasOperator;
+use App\Models\PolyLine;
 use App\Models\Station;
 use App\Models\Stopover;
 use App\Models\Trip;
@@ -244,7 +245,7 @@ class Bahn extends Controller implements DataProviderInterface
         try {
             $response = Http::get("https://www.bahn.de/web/api/reiseloesung/fahrt", [
                 'journeyId' => $journeyId,
-                'poly'      => $poly ? 'true' : 'false',
+                'poly'      => 'true',
             ]);
 
             if ($response->ok()) {
@@ -274,7 +275,7 @@ class Bahn extends Controller implements DataProviderInterface
      * @throws HafasException|JsonException
      */
     public function fetchRawHafasTrip(string $tripId, string $lineName) {
-        return $this->fetchJourney($tripId);
+        return $this->fetchJourney($tripId, true);
     }
 
     /**
@@ -321,6 +322,8 @@ class Bahn extends Controller implements DataProviderInterface
             $tripNumber = $matches[1];
         }
 
+        $polyLine = isset($rawJourney['polylineGroup']) ? $this->getPolyLineFromTrip($rawJourney['polylineGroup']) : null;
+
         $journey = Trip::updateOrCreate([
                                             'trip_id' => $tripID,
                                         ], [
@@ -331,7 +334,7 @@ class Bahn extends Controller implements DataProviderInterface
                                             'operator_id'    => null, //TODO
                                             'origin_id'      => $originStation->id,
                                             'destination_id' => $destinationStation->id,
-                                            'polyline_id'    => null,
+                                            'polyline_id'    => $polyLine?->id,
                                             'departure'      => $departure,
                                             'arrival'        => $arrival,
                                             'source'         => TripSource::BAHN_WEB_API,
@@ -365,5 +368,37 @@ class Bahn extends Controller implements DataProviderInterface
         $journey->stopovers()->saveMany($stopovers);
 
         return $journey;
+    }
+
+    private function getPolyLineFromTrip($journey): PolyLine {
+        $polyLine = $journey['polylineGroup'];
+        $features = [];
+        foreach($polyLine['polylineDescriptions'] as $description) {
+            foreach ($description['coordinates'] as $coordinate) {
+                $feature = [
+                    'type' => 'Feature',
+                    'geometry' => [
+                        'type' => 'Point',
+                        'coordinates' => [
+                            $coordinate['lng'],
+                            $coordinate['lat']
+                        ]
+                    ],
+                    'properties' => [
+                        'source' => 'hafas'
+                    ]
+                ];
+                $features[] = $feature;
+            }
+        }
+        $geoJson = ['type' => 'FeatureCollection', 'features' => $features];
+        $geoJsonString = json_encode($geoJson);
+        $polyline = PolyLine::create([
+                                        'hash' =>       md5($geoJsonString),
+                                        'polyline' =>   $geoJsonString,
+                                        'source' => '   hafas', // maybe add a new one?
+                                        'parent_id' =>  null
+                                     ]);
+        return $polyline;
     }
 }
