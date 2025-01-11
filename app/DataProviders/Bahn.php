@@ -247,7 +247,7 @@ class Bahn extends Controller implements DataProviderInterface
         try {
             $response = Http::get("https://www.bahn.de/web/api/reiseloesung/fahrt", [
                 'journeyId' => $journeyId,
-                'poly'      => 'true',
+                'poly'      => $poly ? 'true' : 'false',
             ]);
 
             if ($response->ok()) {
@@ -290,7 +290,7 @@ class Bahn extends Controller implements DataProviderInterface
     public function fetchHafasTrip(string $tripID, string $lineName): Trip {
         $timezone = "Europe/Berlin";
 
-        $rawJourney = $this->fetchJourney($tripID);
+        $rawJourney = $this->fetchJourney($tripID, true);
         if ($rawJourney === null) {
             // sorry
             throw new HafasException(__('messages.exception.generalHafas'));
