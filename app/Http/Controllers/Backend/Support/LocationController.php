@@ -13,7 +13,6 @@ use App\Objects\LineSegment;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use JsonException;
 use stdClass;
 
@@ -261,7 +260,6 @@ class LocationController
                 $destinationIndex = $key;
             }
         }
-
         if (is_array($features)) { // object is a rarely stdClass without content if no features in the GeoJSON
             $slicedFeatures    = array_slice(
                 array:         $features,
