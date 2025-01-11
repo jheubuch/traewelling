@@ -218,7 +218,7 @@ class Bahn extends Controller implements DataProviderInterface
                 }
 
                 $departure = new Departure(
-                    station:          $departureStation ?? $station,
+                    station:          $departureStation,
                     plannedDeparture: Carbon::parse($rawDeparture['zeit'], $timezone),
                     realDeparture:    isset($rawDeparture['ezZeit']) ? Carbon::parse($rawDeparture['ezZeit'], $timezone) : null,
                     trip:             new BahnTrip(
